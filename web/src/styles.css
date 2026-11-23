@@ -24,7 +24,6 @@ button:focus-visible,input:focus-visible,[tabindex]:focus-visible{outline:2px so
 
 /* header */
 .top{position:relative;z-index:5;padding-top:calc(14px + var(--sat));padding-bottom:14px;display:flex;justify-content:space-between;align-items:center}
-.screen-title{margin:12px 0 0;font-size:30px;font-weight:700;letter-spacing:-.03em}
 .chip{display:inline-flex;align-items:center;gap:8px;height:34px;padding:0 12px;border-radius:999px;background:var(--s2);box-shadow:inset 0 0 0 1px var(--line);font-size:13px;font-weight:500;color:var(--muted)}
 .dot{width:8px;height:8px;border-radius:99px;background:var(--success);box-shadow:0 0 0 3px rgba(23,201,100,.18);flex:none}
 .dot-warn{background:var(--warn);box-shadow:0 0 0 3px rgba(245,165,36,.18)}
@@ -37,14 +36,9 @@ button:focus-visible,input:focus-visible,[tabindex]:focus-visible{outline:2px so
 .popover-actions button{height:36px;border-radius:10px;background:var(--s3);font-size:13px;font-weight:500}
 .popover-actions .danger{background:var(--danger);color:#fff;font-weight:600}
 
-/* stage + dock */
-.stage{position:relative;flex:1;min-height:0;padding-bottom:calc(96px + var(--sab))}
-.screen{height:100%;overflow-y:auto;overflow-x:hidden;padding-bottom:8px;-webkit-overflow-scrolling:touch}
-.dock{position:absolute;left:max(16px,env(safe-area-inset-left,0px));right:max(16px,env(safe-area-inset-right,0px));bottom:calc(14px + var(--sab));z-index:20;height:68px;border-radius:24px;display:grid;grid-template-columns:repeat(4,1fr);padding:6px;box-shadow:inset 0 0 0 1px var(--line2),0 20px 40px -10px rgba(0,0,0,.7)}
-.dock button{position:relative;border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:var(--dim);transition:color .2s}
-.dock button.on{color:var(--fg)}
-.dock-pill{position:absolute;inset:0;border-radius:18px;background:rgba(255,255,255,.08);box-shadow:inset 0 0 0 1px var(--line)}
-.dock-label{position:relative;font-size:11px;font-weight:500}
+/* stage */
+.stage{position:relative;flex:1;min-height:0;padding-bottom:var(--sab)}
+.screen{height:100%;overflow-y:auto;overflow-x:hidden;padding-bottom:24px;-webkit-overflow-scrolling:touch}
 
 /* toast */
 .toast{position:absolute;top:calc(12px + var(--sat));left:50%;z-index:60;padding:10px 16px;border-radius:999px;box-shadow:0 12px 32px rgba(0,0,0,.5),inset 0 0 0 1px var(--line2);font-size:14px;font-weight:500;display:flex;align-items:center;gap:10px;white-space:nowrap}
@@ -54,7 +48,7 @@ button:focus-visible,input:focus-visible,[tabindex]:focus-visible{outline:2px so
 .segmented button{position:relative;height:36px;font-size:13px;font-weight:600;color:var(--dim);transition:color .2s}
 .segmented button.on{color:var(--fg)}
 .seg-pill{position:absolute;inset:0;border-radius:10px;background:var(--s3);box-shadow:0 2px 8px rgba(0,0,0,.35),inset 0 0 0 1px var(--line2)}
-.last-cmd{width:92px;height:44px;position:relative;overflow:hidden}
+.last-cmd{width:100%;height:20px;position:relative;overflow:hidden}
 .last-cmd>div{position:absolute;inset:0;display:grid;place-items:center;font-size:12px;color:var(--primary)}
 
 /* touchpad */
@@ -74,22 +68,19 @@ button:focus-visible,input:focus-visible,[tabindex]:focus-visible{outline:2px so
 .dpad-arc{position:absolute;width:86px;height:86px;border-radius:24px;display:grid;place-items:center;color:var(--muted)}
 .dpad-ok{position:absolute;left:50%;top:50%;width:96px;height:96px;margin:-48px 0 0 -48px;border-radius:999px;background:linear-gradient(180deg,#26262d,#18181c);box-shadow:inset 0 0 0 1px var(--line2),0 10px 24px rgba(0,0,0,.5);font-weight:600;font-size:15px}
 
-/* keys + volume */
+/* keys */
 .keys{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.keys-more{grid-template-columns:repeat(3,1fr)}
 .key{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;height:68px;border-radius:var(--r-lg);background:var(--s1);box-shadow:inset 0 0 0 1px var(--line)}
 .key span{font-size:11px;color:var(--muted)}
-.volume{border-radius:var(--r-lg);padding:14px 16px;display:flex;align-items:center;gap:14px}
-.vol-btn{color:var(--muted);display:grid}
-.vol-btn.danger{color:var(--danger)}
-.vol-track{position:relative;flex:1;height:28px;display:flex;align-items:center;touch-action:none;cursor:pointer}
-.vol-rail{position:absolute;left:0;right:0;height:6px;border-radius:6px;background:var(--s3)}
-.vol-fill{position:absolute;left:0;height:6px;border-radius:6px;background:linear-gradient(90deg,#2f6fe0,var(--primary))}
-.vol-knob{position:absolute;width:22px;height:22px;border-radius:99px;background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.5)}
-.vol-tip{position:absolute;bottom:30px;left:50%;padding:4px 8px;border-radius:8px;background:var(--s3);font-size:12px;box-shadow:inset 0 0 0 1px var(--line2)}
 
 /* app shortcuts */
-.apps-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.app-key{height:48px;border-radius:var(--r-lg);font-size:13px;font-weight:700;box-shadow:inset 0 0 0 1px var(--line2)}
+.apps-row{display:grid;grid-template-columns:72px 1fr 72px;gap:10px}
+.apps-col{display:flex;flex-direction:column;gap:10px}
+.rocker{display:flex;flex-direction:column;align-items:stretch;justify-content:space-between;border-radius:var(--r-lg);background:var(--s1);box-shadow:inset 0 0 0 1px var(--line)}
+.rocker-btn{flex:1;font-size:24px;font-weight:600}
+.rocker-label{text-align:center;font-size:11px;color:var(--muted)}
+.app-key{height:48px;width:100%;border-radius:var(--r-lg);font-size:13px;font-weight:700;box-shadow:inset 0 0 0 1px var(--line2)}
 .app-key:disabled{opacity:.5}
 .rec-banner{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:var(--r-md);background:var(--primary-soft);box-shadow:inset 0 0 0 1px var(--primary);font-size:13px}
 .rec-banner span{flex:1}
@@ -189,3 +180,4 @@ button:focus-visible,input:focus-visible,[tabindex]:focus-visible{outline:2px so
 .preview-live .dot{width:5px;height:5px;background:var(--danger);box-shadow:none}
 .preview.big{width:100%;max-width:720px;border-radius:18px}
 .touchpad,.dpad{max-height:34vh}
+.screen-title{margin:12px 0 0;font-size:30px;font-weight:700;letter-spacing:-.03em}
