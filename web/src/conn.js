@@ -12,7 +12,7 @@ const TIMEOUT_MS = 2500;
 const KEYS = {
   up: 'CursorUp', down: 'CursorDown', left: 'CursorLeft', right: 'CursorRight',
   ok: 'Confirm', back: 'Back', home: 'Home', play: 'PlayPause', pause: 'Pause', stop: 'Stop',
-  rew: 'Rewind', ffwd: 'FastForward', mute: 'Mute', power: 'Standby',
+  rew: 'Rewind', ffwd: 'FastForward', mute: 'Mute',
   volUp: 'VolumeUp', volDown: 'VolumeDown', chUp: 'ChannelStepUp', chDown: 'ChannelStepDown',
   source: 'Source', options: 'Options', info: 'Info', adjust: 'Adjust', watchTv: 'Watch tv',
 };
@@ -67,15 +67,17 @@ function schedule() {
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') poll(); });
 window.addEventListener('online', poll);
 
-const sendKey = async (key) => {
-  try { await request('/input/key', 'POST', { key }); } catch { set({ status: 'offline', tvOnline: false }); return false; }
+const send = async (path, body) => {
+  try { await request(path, 'POST', body); } catch { set({ status: 'offline', tvOnline: false }); return false; }
   return true;
 };
 
 export const conn = {
   start() { poll(); schedule(); },
   async cmd(c) {
-    const ok = await sendKey(KEYS[c] || c);
+    const ok = c === 'power'
+      ? await send('/powerstate', { powerstate: 'Standby' })
+      : await send('/input/key', { key: KEYS[c] || c });
     if (ok && (c === 'volUp' || c === 'volDown' || c === 'mute')) poll();
     return ok;
   },
