@@ -1,16 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { conn, useConn } from './conn.js';
-import { Ic, Toast, spring, tap } from './ui.jsx';
+import { Ic, Toast, tap } from './ui.jsx';
 import RemoteScreen from './screens/Remote.jsx';
-import MoreScreen from './screens/Apps.jsx';
 import { SettingsSheet } from './screens/Settings.jsx';
-
-// Navigation is plain React state (no URL changes), so the iOS standalone app never shows Safari's bar.
-const TABS = [
-  { id: 'remote', n: 'Controle', Icon: Ic.remote, C: RemoteScreen },
-  { id: 'more', n: 'Mais', Icon: Ic.grid, C: MoreScreen },
-];
 
 function StatusChip({ onClick }) {
   const { tvName, tvOnline, status, latency } = useConn();
@@ -48,21 +41,16 @@ function PowerButton({ notify }) {
 }
 
 export default function App() {
-  const [tab, setTab] = useState(() => { try { return Number(sessionStorage.getItem('controle.tab')) || 0; } catch { return 0; } });
-  const [dir, setDir] = useState(1);
   const [toast, setToast] = useState(null);
   const [sheet, setSheet] = useState(false);
 
   useEffect(() => { conn.start(); }, []);
-  useEffect(() => { try { sessionStorage.setItem('controle.tab', String(tab)); } catch {} }, [tab]);
 
   const notify = useCallback((text, kind) => {
     const id = Math.random();
     setToast({ id, text, kind });
     setTimeout(() => setToast((t) => (t && t.id === id ? null : t)), 2000);
   }, []);
-  const go = (i) => { if (i === tab) return; setDir(i > tab ? 1 : -1); setTab(i); };
-  const T = TABS[tab];
 
   return (
     <div className="app">
@@ -72,39 +60,14 @@ export default function App() {
       <header className="top">
         <div>
           <StatusChip onClick={() => setSheet(true)} />
-          <AnimatePresence mode="wait">
-            <motion.h1 key={T.n} className="screen-title"
-              initial={{ opacity: 0, y: 10, filter: 'blur(6px)' }} animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }} exit={{ opacity: 0, y: -8, filter: 'blur(6px)' }} transition={{ duration: 0.22 }}>
-              {T.n}
-            </motion.h1>
-          </AnimatePresence>
+          <h1 className="screen-title">Controle</h1>
         </div>
         <PowerButton notify={notify} />
       </header>
 
       <main className="stage">
-        <AnimatePresence mode="popLayout" initial={false} custom={dir}>
-          <motion.section key={T.id} custom={dir} className="screen"
-            variants={{
-              in: (d) => ({ opacity: 0, x: d * 40, filter: 'blur(8px)' }),
-              on: { opacity: 1, x: 0, filter: 'blur(0px)' },
-              out: (d) => ({ opacity: 0, x: d * -40, filter: 'blur(8px)' }),
-            }}
-            initial="in" animate="on" exit="out" transition={{ type: 'spring', stiffness: 380, damping: 36 }}>
-            <T.C notify={notify} />
-          </motion.section>
-        </AnimatePresence>
+        <section className="screen"><RemoteScreen notify={notify} /></section>
       </main>
-
-      <nav className="dock glass" aria-label="Seções">
-        {TABS.map((t, i) => (
-          <motion.button key={t.id} onClick={() => go(i)} whileTap={{ scale: 0.9 }} aria-label={t.n} aria-current={tab === i ? 'page' : undefined} className={tab === i ? 'on' : ''}>
-            {tab === i && <motion.span layoutId="tabpill" transition={spring} className="dock-pill" />}
-            <motion.span animate={{ y: tab === i ? -1 : 0, scale: tab === i ? 1.08 : 1 }} transition={spring} style={{ position: 'relative', display: 'grid' }}><t.Icon size={21} /></motion.span>
-            <span className="dock-label">{t.n}</span>
-          </motion.button>
-        ))}
-      </nav>
 
       <SettingsSheet key={sheet} open={sheet} onClose={() => setSheet(false)} />
     </div>
