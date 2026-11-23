@@ -16,6 +16,7 @@ A static page served over plain HTTP on the LAN calls the TV directly at `http:/
 
 - Touchpad and D-pad, OK, Back, Home
 - Play/Pause, Mute, volume slider, Power (Standby)
+- App shortcuts (YouTube, Netflix, Prime Video) via recorded navigation macros
 - More tab: Source, Options, Info, Adjust, Channel +/-, Rewind, Fast forward
 - Editable TV IP, stored in localStorage (default `192.168.0.155`)
 
@@ -53,7 +54,7 @@ Verified on this TV.
 
 ## Limitations
 
-- Cannot list or launch apps (403).
+- Cannot list or launch apps (403). App shortcuts replay a recorded navigation from the Home screen, so they break if the Home screen app order changes; re-record them in settings.
 - Powering on from standby needs Wake-on-LAN (UDP), which a browser cannot send.
 - No text input and no screen preview.
 
