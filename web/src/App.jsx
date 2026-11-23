@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { conn, useConn } from './conn.js';
-import { Ic, Toast, tap } from './ui.jsx';
+import { Ic, Toast, tap, spring } from './ui.jsx';
 import RemoteScreen from './screens/Remote.jsx';
 import { SettingsSheet } from './screens/Settings.jsx';
 
