@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence, useMotionValue } from 'framer-motion';
 import { conn, useConn } from '../conn.js';
+import { APPS, macros, useMacros } from '../macros.js';
 import { Ic, Segmented, spring, soft, tap } from '../ui.jsx';
 
 const LABEL = { up: 'Cima', down: 'Baixo', left: 'Esquerda', right: 'Direita', ok: 'OK', back: 'Voltar', home: 'Início', play: 'Play / Pausa', mute: 'Mudo' };
@@ -147,11 +148,16 @@ function Volume({ value, muted }) {
   );
 }
 
-export default function RemoteScreen() {
+export default function RemoteScreen({ notify }) {
   const { tv } = useConn();
+  const { recording, playing } = useMacros();
   const [mode, setMode] = useState(() => { try { return Number(localStorage.getItem('controle.mode')) || 0; } catch { return 0; } });
   const [last, setLast] = useState(null);
-  const send = useCallback((c) => { conn.cmd(c); setLast({ c, id: Math.random() }); }, []);
+  const send = useCallback((c) => {
+    conn.cmd(c); setLast({ c, id: Math.random() });
+    const done = macros.feed(c);
+    if (done) notify('Atalho do ' + APPS.find((a) => a.id === done).label + ' salvo');
+  }, [notify]);
   useEffect(() => { try { localStorage.setItem('controle.mode', String(mode)); } catch {} }, [mode]);
 
   const keys = [['back', 'Voltar', Ic.back], ['home', 'Início', Ic.home], ['play', 'Play / Pausa', Ic.play], ['mute', 'Mudo', Ic.mute]];
@@ -190,6 +196,24 @@ export default function RemoteScreen() {
           </motion.button>
         ))}
       </div>
+
+      <div className="apps-row">
+        {APPS.map((a) => (
+          <motion.button key={a.id} className="app-key" style={{ background: a.bg, color: a.fg }} whileTap={tap} transition={spring}
+            disabled={!!playing || !!recording} aria-label={a.label} onClick={() => macros.launch(a.id)}>
+            {playing === a.id ? 'Abrindo…' : a.label}
+          </motion.button>
+        ))}
+      </div>
+
+      <AnimatePresence>
+        {recording && (
+          <motion.div key="rec" className="rec-banner" role="status" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }} transition={spring}>
+            <span>Gravando atalho do {APPS.find((a) => a.id === recording.app).label}: navegue com as setas até o app e toque OK ({recording.steps.length})</span>
+            <motion.button whileTap={tap} onClick={() => macros.cancel()}>Cancelar</motion.button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <Volume value={tv.volume ?? 30} muted={tv.muted} />
     </div>
