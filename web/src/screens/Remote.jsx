@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence, useMotionValue } from 'framer-motion';
-import { conn, useConn } from '../conn.js';
+import { conn } from '../conn.js';
 import { APPS, macros, useMacros } from '../macros.js';
 import { Ic, Segmented, spring, soft, tap } from '../ui.jsx';
 
@@ -105,51 +105,22 @@ function Dpad({ send }) {
   );
 }
 
-function Volume({ value, muted }) {
-  const ref = useRef(null);
-  const [drag, setDrag] = useState(false);
-  const [local, setLocal] = useState(value);
-  const last = useRef(0);
-  useEffect(() => { if (!drag) setLocal(value); }, [value, drag]);
-
-  const apply = (v) => {
-    setLocal(v);
-    const now = Date.now();
-    if (now - last.current > 80) { last.current = now; conn.volume(v); }
-  };
-  const fromEvent = (e) => { const r = ref.current.getBoundingClientRect(); return Math.round(Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)) * 100); };
-
+function Rocker({ label, up, down, upLabel, downLabel }) {
   return (
-    <div className="surface volume">
-      <motion.button whileTap={tap} onClick={() => conn.cmd('volDown')} aria-label="Diminuir volume" className={'vol-btn' + (muted ? ' danger' : '')}>
-        {muted ? <Ic.mute size={20} /> : <Ic.volLow size={20} />}
-      </motion.button>
-      <div
-        ref={ref} className="vol-track" role="slider" tabIndex={0} aria-label="Volume" aria-valuemin={0} aria-valuemax={100} aria-valuenow={local}
-        onKeyDown={(e) => { if (e.key === 'ArrowRight') apply(Math.min(100, local + 5)); if (e.key === 'ArrowLeft') apply(Math.max(0, local - 5)); }}
-        onPointerDown={(e) => { ref.current.setPointerCapture(e.pointerId); setDrag(true); apply(fromEvent(e)); }}
-        onPointerMove={(e) => drag && apply(fromEvent(e))}
-        onPointerUp={(e) => { setDrag(false); conn.volume(fromEvent(e)); }}
-      >
-        <div className="vol-rail" />
-        <motion.div className="vol-fill" animate={{ width: local + '%' }} transition={drag ? { duration: 0 } : soft} />
-        <motion.div className="vol-knob" animate={{ left: `calc(${local}% - 11px)`, scale: drag ? 1.15 : 1 }} transition={drag ? { duration: 0 } : soft}>
-          <AnimatePresence>
-            {drag && (
-              <motion.div className="vol-tip mono" initial={{ opacity: 0, y: 6, scale: 0.8 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 6 }} style={{ x: '-50%' }}>
-                {local}
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </motion.div>
-      </div>
-      <motion.button whileTap={tap} onClick={() => conn.cmd('volUp')} aria-label="Aumentar volume" className="vol-btn"><Ic.vol size={20} /></motion.button>
+    <div className="rocker">
+      <motion.button className="rocker-btn" whileTap={tap} transition={spring} aria-label={upLabel} onClick={() => conn.cmd(up)}>+</motion.button>
+      <span className="rocker-label">{label}</span>
+      <motion.button className="rocker-btn" whileTap={tap} transition={spring} aria-label={downLabel} onClick={() => conn.cmd(down)}>−</motion.button>
     </div>
   );
 }
 
+const MORE_KEYS = [
+  ['source', 'Fonte', Ic.tv], ['options', 'Opções', Ic.grid], ['info', 'Info', Ic.search], ['adjust', 'Ajustes', Ic.keys],
+  ['rew', 'Voltar faixa', Ic.rew], ['ffwd', 'Avançar', Ic.ffwd],
+];
+
 export default function RemoteScreen({ notify }) {
-  const { tv } = useConn();
   const { recording, playing } = useMacros();
   const [mode, setMode] = useState(() => { try { return Number(localStorage.getItem('controle.mode')) || 0; } catch { return 0; } });
   const [last, setLast] = useState(null);
@@ -164,8 +135,8 @@ export default function RemoteScreen({ notify }) {
 
   return (
     <div className="stack" style={{ gap: 14 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-        <div style={{ flex: 1 }}><Segmented id="mode" value={mode} options={['Touchpad', 'Direcional']} onChange={setMode} /></div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+        <div><Segmented id="mode" value={mode} options={['Touchpad', 'Direcional']} onChange={setMode} /></div>
         <div className="last-cmd" aria-live="polite">
           <AnimatePresence mode="popLayout">
             {last && (
@@ -198,12 +169,16 @@ export default function RemoteScreen({ notify }) {
       </div>
 
       <div className="apps-row">
+        <Rocker label="VOL" up="volUp" down="volDown" upLabel="Aumentar volume" downLabel="Diminuir volume" />
+        <div className="apps-col">
         {APPS.map((a) => (
           <motion.button key={a.id} className="app-key" style={{ background: a.bg, color: a.fg }} whileTap={tap} transition={spring}
             disabled={!!playing || !!recording} aria-label={a.label} onClick={() => macros.launch(a.id)}>
             {playing === a.id ? 'Abrindo…' : a.label}
           </motion.button>
         ))}
+        </div>
+        <Rocker label="CH" up="chUp" down="chDown" upLabel="Canal +" downLabel="Canal −" />
       </div>
 
       <AnimatePresence>
@@ -215,7 +190,13 @@ export default function RemoteScreen({ notify }) {
         )}
       </AnimatePresence>
 
-      <Volume value={tv.volume ?? 30} muted={tv.muted} />
+      <div className="keys keys-more">
+        {MORE_KEYS.map(([c, label, Icon]) => (
+          <motion.button key={c} className="key" whileTap={tap} transition={spring} aria-label={label} onClick={() => { conn.cmd(c); notify(label); }}>
+            <Icon /><span>{label}</span>
+          </motion.button>
+        ))}
+      </div>
     </div>
   );
 }
