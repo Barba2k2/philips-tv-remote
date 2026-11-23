@@ -15,9 +15,10 @@ A static page served over plain HTTP on the LAN calls the TV directly at `http:/
 ## Features
 
 - Touchpad and D-pad, OK, Back, Home
-- Play/Pause, Mute, volume slider, Power (Standby)
+- Play/Pause, Mute, Power (Standby)
 - App shortcuts (YouTube, Netflix, Prime Video) via recorded navigation macros
-- More tab: Source, Options, Info, Adjust, Channel +/-, Rewind, Fast forward
+- Volume and channel rockers beside the app shortcuts
+- Extra keys: Source, Options, Info, Adjust, Rewind, Fast forward (single scrolling page)
 - Editable TV IP, stored in localStorage (default `192.168.0.155`)
 
 ## Build and run
